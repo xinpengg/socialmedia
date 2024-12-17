@@ -3,10 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Tweets</title>
+    <title>Iriminaer</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Open+Sans:wght@400;700&family=Lato:wght@400;700&family=Montserrat:wght@400;700&family=Merriweather:wght@400;700&family=Playfair+Display:wght@400;700&family=Noto+Serif:wght@400;700&family=Fira+Code&family=Source+Code+Pro&family=Bebas+Neue&family=Oswald:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
+    <h2>Iriminaer</h2>
+    <div id="container">
     <div id="tweets"></div>
+    <button id="tweetButton">Tweet</button>
     <script>
         async function fetchUsers() {
             try {
@@ -17,22 +22,59 @@
                 return [];
             }
         }
-
+        async function fetchImages() { 
+            try {
+                const response = await fetch("https://jsonplaceholder.typicode.com/photos");
+                return await response.json();
+            } catch (error) {
+                console.error('Error fetching images:', error);
+                return [];
+            }
+        }
+        async function makePost(postData) { 
+            try {
+                const response = await fetch("https://jsonplaceholder.typicode.com/posts", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(postData)
+                });
+                const newPost = await response.json();
+                console.log('Post created:', newPost);
+                return newPost;
+            } catch (error) {
+                console.error('Error creating post:', error);
+                return null;
+            }
+        }
+    
         async function fetchPosts() {
     try {
         const users = await fetchUsers();
+        const images = await fetchImages();
         const tweetsContainer = document.getElementById('tweets');
+        tweetsContainer.innerHTML = '';
         const response = await fetch("https://jsonplaceholder.typicode.com/posts");
         const posts = await response.json();
+        console.log('Fetched posts:', posts);
+
         posts.forEach(post => {
-            let username = post.userId;
+            let username = post.userId; 
             users.forEach(user => {
                 if (user.id === post.userId) {
                     username = user.username;
+                    name = user.name;
                 }
             });
-            const tweetElement = document.createElement('p');
-            tweetElement.textContent = `@${username}: ${post.body}`;
+            const tweetElement = document.createElement('div');
+            tweetElement.innerHTML = `<p>${name} @${username}</p><p>${post.body}</p>`;
+
+            const userImages = images.filter(image => image.albumId === post.userId);
+            if (userImages.length > 0) {
+                const randomImage = userImages[Math.floor(Math.random() * userImages.length)];
+                tweetElement.innerHTML += `<img src="${randomImage.thumbnailUrl}" alt="User Image"/>`;
+            }
             tweetsContainer.append(tweetElement);
         });
     } catch (error) {
@@ -40,8 +82,44 @@
     }
 }
 
+        document.getElementById('tweetButton').addEventListener('click', async () => {
+            const users = await fetchUsers();
+            const userOptions = users.map(user => `${user.id}: ${user.username}`).join('\n');
+            const userId = prompt(`Enter user ID:\n${userOptions}`);
+            const selectedUser = users.find(user => user.id == userId);
+    
+            if (!selectedUser) {
+                alert('Invalid user ID.');
+                return;
+            }
+    
+            const title = prompt('Enter post title:');
+            const body = prompt('Enter post body:');
+            if (title && body) {
+                const newPost = await makePost({ title, body, userId: selectedUser.id });
+                if (newPost) {
+                    alert('Post created successfully!');
+                    const tweetsContainer = document.getElementById('tweets');
+                    const tweetElement = document.createElement('div');
+                    tweetElement.innerHTML = `<p>${selectedUser.name} @${selectedUser.username}</p><p>${newPost.body}</p>`;
+                    
+                    const images = await fetchImages();
+                    const randomImage = images[Math.floor(Math.random() * images.length)];
+                    tweetElement.innerHTML += `<img src="${randomImage.thumbnailUrl}" />`;
+
+                    tweetsContainer.append(tweetElement);
+                } else {
+                    alert('Error creating post.');
+                }
+            } else {
+                alert('Title and body are required.');
+            }
+        });
 
         fetchPosts();
     </script>
+     <footer>
+        <p>Made with <3 by Xinpeng</p>
+    </footer>
 </body>
 </html>
