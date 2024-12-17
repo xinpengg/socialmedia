@@ -1,0 +1,47 @@
+body {
+    background-color: black;
+    color: white;
+    font-family: 'Roboto', sans-serif;
+
+}
+
+#container {
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+}
+
+#tweets {
+    flex: 1;
+}
+h1, h2, h3 {
+    font-family: 'Montserrat', sans-serif;
+}
+
+#tweetButton {
+    align-self: flex-start;
+    margin-left: 20px;
+    height: fit-content;
+    padding: 20px 40px;
+    font-size: 20px;
+    text-align: center;
+    background-color: #333;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: 'Oswald', sans-serif;
+
+}
+
+#tweetButton:hover {
+    background-color: #555;
+}
+
+div {
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    background-color: #222;
+}
